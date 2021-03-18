@@ -14,7 +14,7 @@ const ListSchema=new mongoose.Schema({
     },
     listname:{
         type:String,
-        required:true
+        
     },
     date:{
         type:Date,
