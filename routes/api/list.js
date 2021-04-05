@@ -4,11 +4,12 @@ const auth=require('../../middleware/auth');
 const List =require('../../models/List');
 const {check,validationResult}=require('express-validator');
 const User = require('../../models/User');
+const Subitem=require('../../models/Subitem');
 //create a list
-router.post('/',[
-    check('content','Provide a content').notEmpty(),
-    check('listname','list name is required').notEmpty()
-],auth,async(req,res)=>{
+router.post('/',auth,[
+    check('item','item name is required').notEmpty()
+    //check('subitem','Provide a item').notEmpty()
+],async(req,res)=>{
         const errors=validationResult(req);
     if(!errors.isEmpty()){
         return res
@@ -16,15 +17,14 @@ router.post('/',[
         .json({errors:errors.array()});
     }
     try {
-        const user=await User.findById(req.user.id).select('-password');
-        const list=new List({
-        content:req.body.content,
-        name:user.firstname,
-        user:req.user.id,
-        listname:req.body.listname
-    }) ;
-        await list.save();
-        res.json({list});
+        const user=await User.findById(req.user.id).select('-password')
+        const newList=new List({
+            user:req.user.id,
+            name:req.user.name,
+            item:req.body.item,
+        });
+            const list=await newList.save()
+        res.json(list);
         
     } catch (err) {
         console.error(err.message);
@@ -33,12 +33,14 @@ router.post('/',[
         .send('Server Error')
     }
 });
+
 //get all list of a user
 router.get('/',auth,async(req,res)=>{
     try {
         const lists =await List.find().sort({date:-1});
+        const subitems=await Subitem.find().sort({date:-1});
         res
-        .json(lists);
+        .json({lists,subitems});
     } catch (err) {
         console.error(err.message);
         res
@@ -48,7 +50,7 @@ router.get('/',auth,async(req,res)=>{
     }
 });
 //get list by id
-router.get('/:id',auth,async(req,res)=>{
+/*router.get('/:id',auth,async(req,res)=>{
     try {
         const list=await List.findById(req.params.id);
         if(!list){
@@ -56,17 +58,18 @@ router.get('/:id',auth,async(req,res)=>{
             .status(404)
             .json({msg:'list does not exist'})
         }
-        res.json(list);
+        const subitem=await Subitem.
+        res.json({list,subitem});
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
     }
-});
+});*/
 //edit a list 
+/*
 router.put('/:id',
 [
-    check('content','Provide a content').notEmpty(),
-    check('listname','list name is required').notEmpty()
+    check('item','Provide a content').notEmpty()
 ],auth,async(req,res)=>{
     const errors=validationResult(req);
     if(!errors.isEmpty()){
@@ -74,13 +77,6 @@ router.put('/:id',
         .status(400)
         .json(({errors:errors.array()}));
     }
-    /*const {
-        content,
-        listname
-    }=req.body*/
-    /*const newList={
-        content,listname
-    }*/
     try {
         const list=await List.findByIdAndUpdate(req.params.id,{$set:req.body},
             function(err,list){
@@ -97,6 +93,7 @@ router.put('/:id',
         res.status(500).send('Server error');
     }
 });
+
 router.delete('/:id',auth,async(req,res)=>{
     try{
     const list=await List.findById(req.params.id);
@@ -120,5 +117,5 @@ router.delete('/:id',auth,async(req,res)=>{
         .json('Server Error');
     }
     }
-);
+);*/
 module.exports=router;

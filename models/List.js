@@ -8,14 +8,10 @@ const ListSchema=new mongoose.Schema({
     name:{
         type:String
     },
-    content:{
-        type:String,
-        required:true
-    },
-    listname:{
-        type:String,
-        
-    },
+          item: {
+            type: String,
+            open:{type:Boolean, default:true}
+          },
     date:{
         type:Date,
         default:Date.now
