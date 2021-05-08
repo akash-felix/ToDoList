@@ -4,7 +4,7 @@ const auth=require('../../middleware/auth');
 const List =require('../../models/List');
 const {check,validationResult}=require('express-validator');
 const User = require('../../models/User');
-const Subitem=require('../../models/Subitem');
+//const Subitem=require('../../models/Subitem');
 //create a list
 router.post('/',auth,[
     check('item','item name is required').notEmpty()
@@ -17,7 +17,7 @@ router.post('/',auth,[
         .json({errors:errors.array()});
     }
     try {
-        const user=await User.findById(req.user.id).select('-password')
+        const user=await User.findById(req.user.id).select('-password');
         const newList=new List({
             user:req.user.id,
             name:req.user.name,
@@ -38,9 +38,9 @@ router.post('/',auth,[
 router.get('/',auth,async(req,res)=>{
     try {
         const lists =await List.find().sort({date:-1});
-        const subitems=await Subitem.find().sort({date:-1});
+        //const subitems=await Subitem.find().sort({date:-1});
         res
-        .json({lists,subitems});
+        .json({lists});
     } catch (err) {
         console.error(err.message);
         res
@@ -50,7 +50,7 @@ router.get('/',auth,async(req,res)=>{
     }
 });
 //get list by id
-/*router.get('/:id',auth,async(req,res)=>{
+router.get('/:id',auth,async(req,res)=>{
     try {
         const list=await List.findById(req.params.id);
         if(!list){
@@ -58,15 +58,14 @@ router.get('/',auth,async(req,res)=>{
             .status(404)
             .json({msg:'list does not exist'})
         }
-        const subitem=await Subitem.
-        res.json({list,subitem});
-    } catch (err) {
+        res.json(list);
+    } catch (err) { 
         console.error(err.message);
         res.status(500).send('Server error');
     }
-});*/
+});
 //edit a list 
-/*
+
 router.put('/:id',
 [
     check('item','Provide a content').notEmpty()
@@ -93,7 +92,6 @@ router.put('/:id',
         res.status(500).send('Server error');
     }
 });
-
 router.delete('/:id',auth,async(req,res)=>{
     try{
     const list=await List.findById(req.params.id);
@@ -102,7 +100,7 @@ router.delete('/:id',auth,async(req,res)=>{
         .status(401)
         .json({msg:'Not authorized'})
     }
-    await List.remove();
+    await List.remove(list);
     res.json('Post removed')
     }
     catch(err){
@@ -117,5 +115,5 @@ router.delete('/:id',auth,async(req,res)=>{
         .json('Server Error');
     }
     }
-);*/
+);
 module.exports=router;
